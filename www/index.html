@@ -1,23 +1,77 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>foo</title>
+    <title>Chat!</title>
     <script src="libs/socket.io/dist/socket.io.js"></script>
+    <script src="libs/jquery-1.6.2.min.js"></script>
     <script>
-      var socket = io.connect('http://127.0.0.1:4001');
-      socket.on('connect', function() {
-        console.log('connected...');
-        socket.emit('test event', 'foooooo');
-      });
-      socket.on('tweet', function(data) {
-        console.log(data);
-      });
-      socket.on('disconnect', function() {
-        console.log('disconnected...');
+      $(function(){
+        var chat = io.connect('http://127.0.0.1:4001/chat');
+
+        chat.on('connect', function() {
+          console.log('connected...');
+        });
+
+        chat.on('disconnect', function() {
+          console.log('disconnected...');
+        });
+
+        chat.on('user', function(data) {
+          if ($("span#username").text()) {
+            var message = $("<li>").text('server says: a new user has joined:' + data.name);
+            $("ul#room").prepend(message);
+          } else {
+          $("span#username").text(data.name);
+          };
+        });
+
+        chat.on('message', function(data) {
+          console.log(data);
+          var message = $("<li>").text(data.name + ' says: ' + data.message);
+          $("ul#room").prepend(message);
+        });
+
+        $("input[type='submit']").click(function(event) {
+          event.preventDefault();
+          var message = {
+            name: $("span#username").html(),
+            message: $("input[name='message']").val()
+          };
+          chat.emit('say', message);
+          $("input[name='message']").val('');
+        });
+        
+        $("label[for='name'], input[name='name'], input[name='change_ok']").hide();
+        $("input[name='change']").click(function(event) {
+          event.preventDefault();
+          $("label[for='name'], input[name='name'], input[name='change_ok']").show();
+          $(this).hide();
+        });
+
+        $("input[name='change_ok']").click(function(event) {
+          event.preventDefault();
+          chat.emit('user name change', {o: $("span#username").html(), n: $("input[name='name']").val()});
+          $("span#username").html($("input[name='name']").val());
+          $("label[for='name'], input[name='name'], input[name='change_ok']").hide();
+          $("input[name='change']").show();
+        });
+
       });
     </script>
   </head>
   <body>
-    <p>console fool</p>
+    <form id="poster">
+      <label for="name">name:</label>
+      <input type="input" name="name" />
+      <input type="button" value="ok" name="change_ok" />
+      <span id="username"></span>
+      <input type="button" value="change" name="change" />
+      <br />
+      <label for="message">message:</label>
+      <input type="input" name="message" size="40" />
+      <input type="submit" value="say it." />
+    </form>
+    <ul id="room">
+    </ul>
   </body>
 </html>

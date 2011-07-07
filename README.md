@@ -3,5 +3,4 @@
 # Installation
 
     nmp install socket.io
-    nmp install twitter-node
 

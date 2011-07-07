@@ -1,24 +1,22 @@
-var io = require('socket.io').listen(4001),
+var io = require('socket.io'),
     twitter = require('twitter-node');
 
-var t = new twitter.TwitterNode({
-  user: 'annoyed_penguin', 
-  password: 'mobs18"injurer'
-})
+var server = io.listen(4001);
+var chat = server.of('/chat').on('connection', function(socket) {
+  var now = Math.floor(new Date().getTime()/1000);
+  chat.emit('user', {name: now});
 
-t.track('3sq');
-
-t.headers['User-Agent'] = 'brains!!!';
-
-io.sockets.on('connection', function(socket) {
-  socket.emit('news', {hello: 'world'});
-
-  t.addListener('tweet', function(tweet) {
-    socket.emit('tweet', tweet);
+  socket.on('disconnect', function() {
+    chat.emit('message', {name: 'server', message: 'user disconnected'});
   });
 
-  socket.on('test event', function(data) {
-    console.log(data);
+  socket.on('say', function(data) {
+    chat.emit('message', data);
+  });
+
+  socket.on('user name change', function(data) {
+    var message = {name: 'server', message: data.o + ' is know known as ' + data.n};
+    chat.emit('message', message);
   });
 });
 
