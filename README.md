@@ -1,4 +1,4 @@
-# Node.js thing!
+# A node.js chat thing!
 
 # Installation
 
