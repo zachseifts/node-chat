@@ -26,7 +26,6 @@
         });
 
         chat.on('message', function(data) {
-          console.log(data);
           var message = $("<li>").text(data.name + ' says: ' + data.message);
           $("ul#room").prepend(message);
         });

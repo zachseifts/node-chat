@@ -1,5 +1,4 @@
-var io = require('socket.io'),
-    twitter = require('twitter-node');
+var io = require('socket.io');
 
 var server = io.listen(4001);
 var chat = server.of('/chat').on('connection', function(socket) {
